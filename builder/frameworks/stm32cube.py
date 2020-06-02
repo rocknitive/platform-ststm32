@@ -174,7 +174,6 @@ env.Append(
     ],
 
     CPPDEFINES=[
-        "USE_HAL_DRIVER",
         ("F_CPU", "$BOARD_F_CPU")
     ],
 
@@ -272,6 +271,13 @@ libs.append(env.BuildLibrary(
     join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
          MCU_FAMILY.upper() + "xx_HAL_Driver"),
     src_filter="+<*> -<Src/*_template.c> -<Src/Legacy>"
+))
+
+libs.append(env.BuildLibrary(
+    join("$BUILD_DIR", "FrameworkLLDriver"),
+    join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
+         MCU_FAMILY.upper() + "xx_HAL_Driver"),
+    src_filter="+<*_ll_*>"
 ))
 
 libs.append(env.BuildLibrary(
