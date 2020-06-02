@@ -160,6 +160,15 @@ env.Replace(
     ASCOM="$ASPPCOM"
 )
 
+
+additional_cppdefines = [("F_CPU", "$BOARD_F_CPU")]
+
+hal_type = env.subst("$HAL")
+if (hal_type == "LL"):
+    additional_cppdefines.append("USE_FULL_LL_DRIVER")
+else:
+    additional_cppdefines.append("USE_HAL_DRIVER")
+
 env.Append(
     ASFLAGS=["-x", "assembler-with-cpp"],
 
@@ -173,9 +182,7 @@ env.Append(
         "-nostdlib"
     ],
 
-    CPPDEFINES=[
-        ("F_CPU", "$BOARD_F_CPU")
-    ],
+    CPPDEFINES=additional_cppdefines,
 
     CXXFLAGS=[
         "-fno-rtti",
@@ -266,19 +273,21 @@ if isdir(bsp_dir):
     libs.append(env.BuildLibrary(join("$BUILD_DIR", "FrameworkBSP"), bsp_dir))
     env.Append(CPPPATH=[bsp_dir])
 
-libs.append(env.BuildLibrary(
-    join("$BUILD_DIR", "FrameworkHALDriver"),
-    join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
-         MCU_FAMILY.upper() + "xx_HAL_Driver"),
-    src_filter="+<*> -<Src/*_template.c> -<Src/Legacy>"
-))
-
-libs.append(env.BuildLibrary(
-    join("$BUILD_DIR", "FrameworkLLDriver"),
-    join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
-         MCU_FAMILY.upper() + "xx_HAL_Driver"),
-    src_filter="+<*_ll_*>"
-))
+# Skip the HAL sources if only LL is used
+if hal_type == "LL":
+    libs.append(env.BuildLibrary(
+        join("$BUILD_DIR", "FrameworkLLDriver"),
+        join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
+            MCU_FAMILY.upper() + "xx_HAL_Driver"),
+        src_filter="+<*_ll_*>"
+    ))
+else:
+    libs.append(env.BuildLibrary(
+        join("$BUILD_DIR", "FrameworkHALDriver"),
+        join(FRAMEWORK_DIR, FRAMEWORK_CORE, "Drivers",
+            MCU_FAMILY.upper() + "xx_HAL_Driver"),
+        src_filter="+<*> -<Src/*_template.c> -<Src/Legacy>"
+    ))
 
 libs.append(env.BuildLibrary(
     join("$BUILD_DIR", "FrameworkCMSISDevice"),
