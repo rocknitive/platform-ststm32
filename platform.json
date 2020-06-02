@@ -19,7 +19,7 @@
         {
           "system": "*",
           "url": "https://github.com/rocknitive/framework-stm32cube/archive/master.zip",
-          "version": "2.1"
+          "version": "2.2.0"
         }
       ]
     },
